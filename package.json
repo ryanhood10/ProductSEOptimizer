@@ -2,7 +2,7 @@
   "name": "product-seo-optimizer",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server/index.js",
+    "start": "node server/server.js",
     "heroku-postbuild": "npm install --prefix client/product-search-engine-optimizer && npm run build --prefix client/product-search-engine-optimizer"
   },
   "dependencies": {
