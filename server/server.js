@@ -1,10 +1,24 @@
 const dotenv = require('dotenv');
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-const https = require("https"); // Use the built-in 'https' module
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 dotenv.config();
+
+const gemini_api_key = process.env.GEMINI_API_KEY;
+if (!gemini_api_key) {
+  console.error("Gemini API key is not set in the environment variables.");
+  process.exit(1);
+}
+
+const googleAI = new GoogleGenerativeAI(gemini_api_key);
+const geminiConfig = {
+  temperature: 0.9,
+  topP: 1,
+  topK: 1,
+  maxOutputTokens: 4096,
+};
 
 const app = express();
 
@@ -12,47 +26,18 @@ app.use(express.json());
 app.use(cors());
 
 app.post('/completions', async (req, res) => {
-  const postData = JSON.stringify({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: req.body.message }],
-    max_tokens: 3000,
-  });
-
-  const options = {
-    hostname: 'api.openai.com',
-    port: 443,
-    path: '/v1/chat/completions',
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-      'Content-Length': postData.length,
-    },
-  };
-
   try {
-    const request = https.request(options, (response) => {
-      let data = '';
-
-      response.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      response.on('end', () => {
-        res.send(JSON.parse(data));
-      });
+    const prompt = req.body.message;
+    const geminiModel = googleAI.getGenerativeModel({
+      model: "gemini-pro",
+      geminiConfig,
     });
-
-    request.on('error', (error) => {
-      console.error(error);
-      res.status(500).send({ error: 'Failed to fetch data from OpenAI' });
-    });
-
-    request.write(postData);
-    request.end();
+    const result = await geminiModel.generateContent(prompt);
+    const response = await result.response.text();
+    res.send({ text: response });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: 'Failed to fetch data from OpenAI' });
+    console.error("Response error", error);
+    res.status(500).send({ error: 'Failed to fetch data from Gemini' });
   }
 });
 
@@ -68,4 +53,3 @@ const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Express Server listening on port ${port}`);
 });
- 
