@@ -39,9 +39,9 @@ function MainPage() {
     };
 
     setIsLoading(true);
-
     try {
-      const response = await fetch("http://localhost:3001/completions", options);
+      const response = await fetch("https://product-seo-optimizer-b5addb5025ae.herokuapp.com/completions", options);
+      // const response = await fetch("http://localhost:3001/completions", options);
       const data = await response.json();
       setOptimizedDescription(data.text);
       setIsLoading(false);
