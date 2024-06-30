@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "scripts": {
       "start": "node server/server.js",
-      "heroku-postbuild": "npm install --prefix client/product-search-engine-optimizer && npm run build --prefix client/product-search-engine-optimizer"
+      "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
     },
     "dependencies": {
       "express": "^4.17.1"
